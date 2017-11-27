@@ -8,17 +8,14 @@ Input parameters include:\n\
 
 
 #include <petscksp.h>
-#include <fstream>
-using namespace std;
+
 #undef __FUNCT__
-#define __FUNCT__ "main"
-#define pi 3.1415926
-PetscScalar Br[111][200][9],Bt[111][200][9],Bp[111][200][9],vr[111][200][9],vt[111][200][9],vp[111][200][9],P[111][200][9],rho[111][200][9];
-PetscScalar r[111][200][9],theta[111][200][9];
+#define __FUNCT__ "main" 
+extern PetscScalar Br[199][110][9],Bt[199][110][9],Bp[199][110][9],vr[199][110][8],vt[199][110][9],vp[199][110][9],P[199][110][9],rho[199][110][9];
+extern PetscScalar r[199][110][9],theta[199][110][9];
 
 PetscInt nphi = 8,npsi = 111,nthe = 101,n2th = 2*(nthe-1);
-PetscScalar dtheta = 2*pi/n2th,dphi = 2*pi/8,dr = 1/110,dt = 0.1,a=4,gamm=1;
-
+PetscScalar dtheta = 0.1,dphi = 0.1,dr = 0.1,dt = 0.1,a=4,gamm=1;
 
 /*
 f=rho[i][j][k],P[i][j][k],v,B;t=theta[i][j][k];P[i][j][k]=phi;
@@ -109,84 +106,84 @@ PetscScalar dF1dvp(PetscInt i,PetscInt j,PetscInt k){
 }
 //********************
 PetscScalar dF2dP(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=-1/dt-gamm/(r[i][j][k]*(a+r[i][j][k]*cos(theta[i][j][k])))*(r[i][j][k]*(a+r[i][j][k]*cos(theta[i][j][k]))*(vr[i+1][j][k]-vr[i-1][j][k])/(2*dr)+(a+2*r[i][j][k]*cos(theta[i][j][k]))*vr[i][j][k]+(a+r[i][j][k]*cos(theta[i][j][k]))*(vt[i][j+1][k]-vt[i][j-1][k])/(2*dtheta)-r[i][j][k]*sin(theta[i][j][k])*vt[i][j][k]+r[i][j][k]*(vp[i][j][k+1]-vp[i][j][k-1])/(2*dphi));
-	return s;
+  PetscScalar s;
+  s=-1/dt-gamm/(r[i][j][k]*(a+r[i][j][k]*cos(theta[i][j][k])))*(r[i][j][k]*(a+r[i][j][k]*cos(theta[i][j][k]))*(vr[i+1][j][k]-vr[i-1][j][k])/(2*dr)+(a+2*r[i][j][k]*cos(theta[i][j][k]))*vr[i][j][k]+(a+r[i][j][k]*cos(theta[i][j][k]))*(vt[i][j+1][k]-vt[i][j-1][k])/(2*dtheta)-r[i][j][k]*sin(theta[i][j][k])*vt[i][j][k]+r[i][j][k]*(vp[i][j][k+1]-vp[i][j][k-1])/(2*dphi));
+  return s;
 }
 PetscScalar dF2dvr(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s = -(P[i+1][j][k]-P[i-1][j][k])/(2*dr)-gamm*P[i][j][k]/(r[i][j][k]*(a+r[i][j][k]*cos(theta[i][j][k])))*(a+2*r[i][j][k]*cos(theta[i][j][k]));
-	return s;
+  PetscScalar s;
+  s = -(P[i+1][j][k]-P[i-1][j][k])/(2*dr)-gamm*P[i][j][k]/(r[i][j][k]*(a+r[i][j][k]*cos(theta[i][j][k])))*(a+2*r[i][j][k]*cos(theta[i][j][k]));
+  return s;
 }
 PetscScalar dF2dvt(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=-1/r[i][j][k]*(P[i][j+1][k]-P[i][j-1][k])/(2*dtheta)+gamm*P[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))*sin(theta[i][j][k]);
-	return s;
+  PetscScalar s;
+  s=-1/r[i][j][k]*(P[i][j+1][k]-P[i][j-1][k])/(2*dtheta)+gamm*P[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))*sin(theta[i][j][k]);
+  return s;
 }
 PetscScalar dF2dvp(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=-1/(a+r[i][j][k]*cos(theta[i][j][k]))*(P[i][j][k+1]-P[i][j][k-1])/(2*dphi);
-	return s;
+  PetscScalar s;
+  s=-1/(a+r[i][j][k]*cos(theta[i][j][k]))*(P[i][j][k+1]-P[i][j][k-1])/(2*dphi);
+  return s;
 }
 PetscScalar dF2dPi1(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=-vr[i][j][k]/(2*dr);
-	return s;
+  PetscScalar s;
+  s=-vr[i][j][k]/(2*dr);
+  return s;
 }
 PetscScalar dF2dPi0(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=vr[i][j][k]/(2*dr);
-	return s;
+  PetscScalar s;
+  s=vr[i][j][k]/(2*dr);
+  return s;
 }
 PetscScalar dF2dPj1(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=-vt[i][j][k]/(2*r[i][j][k]*dtheta);
-	return s;
+  PetscScalar s;
+  s=-vt[i][j][k]/(2*r[i][j][k]*dtheta);
+  return s;
 }
 PetscScalar dF2dPj0(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=vt[i][j][k]/(2*r[i][j][k]*dtheta);
-	return s;
+  PetscScalar s;
+  s=vt[i][j][k]/(2*r[i][j][k]*dtheta);
+  return s;
 }
 PetscScalar dF2dPk1(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=-1/(a+r[i][j][k]*cos(theta[i][j][k]))*vp[i][j][k]/(2*dphi);
-	return s;
+  PetscScalar s;
+  s=-1/(a+r[i][j][k]*cos(theta[i][j][k]))*vp[i][j][k]/(2*dphi);
+  return s;
 }
 PetscScalar dF2dPk0(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=1/(a+r[i][j][k]*cos(theta[i][j][k]))*vp[i][j][k]/(2*dphi);
-	return s;
+  PetscScalar s;
+  s=1/(a+r[i][j][k]*cos(theta[i][j][k]))*vp[i][j][k]/(2*dphi);
+  return s;
 }
 PetscScalar dF2dvri1(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=-gamm*P[i][j][k]/(2*dr);
-	return s;
+  PetscScalar s;
+  s=-gamm*P[i][j][k]/(2*dr);
+  return s;
 }
 PetscScalar dF2dvri0(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=gamm*P[i][j][k]/(2*dr);
-	return s;
+  PetscScalar s;
+  s=gamm*P[i][j][k]/(2*dr);
+  return s;
 }
 PetscScalar dF2dvtj1(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=-gamm*P[i][j][k]/(r[i][j][k]*2*dtheta);
-	return s;
+  PetscScalar s;
+  s=-gamm*P[i][j][k]/(r[i][j][k]*2*dtheta);
+  return s;
 }
 PetscScalar dF2dvtj0(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=gamm*P[i][j][k]/(r[i][j][k]*2*dtheta);
-	return s;
+  PetscScalar s;
+  s=gamm*P[i][j][k]/(r[i][j][k]*2*dtheta);
+  return s;
 }
 PetscScalar dF2dvpk1(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=-gamm*P[i][j][k]/((a+r[i][j][k]*cos(theta[i][j][k]))*2*dphi);
-	return s;
+  PetscScalar s;
+  s=-gamm*P[i][j][k]/((a+r[i][j][k]*cos(theta[i][j][k]))*2*dphi);
+  return s;
 }
 PetscScalar dF2dvpk0(PetscInt i,PetscInt j,PetscInt k){
-	PetscScalar s;
-	s=gamm*P[i][j][k]/((a+r[i][j][k]*cos(theta[i][j][k]))*2*dphi);
-	return s;
+  PetscScalar s;
+  s=gamm*P[i][j][k]/((a+r[i][j][k]*cos(theta[i][j][k]))*2*dphi);
+  return s;
 }
 //************
 PetscScalar dF3_1dvr(PetscInt i,PetscInt j,PetscInt k){
@@ -872,20 +869,14 @@ PetscScalar dF4_3dvpk0(PetscInt i,PetscInt j,PetscInt k){
 }
 
 PetscScalar F1(PetscInt i,PetscInt j,PetscInt k){
-  PetscScalar s = -rho[i][j][k]*(a+2*r[i][j][k]*cos(theta[i][j][k]))*vr[i][j][k]/(r[i][j][k]*(a+r[i][j][k]*cos(theta[i][j][k])))-rho[i][j][k] \
-                  *(vr[i+1][j][k]-vr[i-1][j][k])/(2*dr)+sin(theta[i][j][k])*rho[i][j][k]*vt[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k])) \
-                  -rho[i][j][k]*(vt[i][j+1][k]-vt[i][j-1][k])/(2*dtheta*r[i][j][k])-rho[i][j][k]*(vp[i][j][k+1]-vp[i][j][k-1])/(2*dphi*(a+r[i][j][k]*cos(theta[i][j][k])));
+  PetscScalar s = ;
   return s;
 }
 PetscScalar F2(PetscInt i,PetscInt j,PetscInt k){
-  PetscScalar s = -vr[i][j][k]*(P[i+1][j][k]-P[i-1][j][k])/(2*dr)-vt[i][j][k]*(P[i][j+1][k]-P[i][j-1][k])/(2*dtheta*r[i][j][k]) \
-                  -vp[i][j][k]*(P[i][j][k+1]-P[i][j][k-1])/(2*dphi*(a+r[i][j][k]*cos(theta[i][j][k])))-gamm*(a+2*r[i][j][k]*cos(theta[i][j][k])) \
-                  /(r[i][j][k]*(a+r[i][j][k]*cos(theta[i][j][k])))*P[i][j][k]*vr[i][j][k]-gamm*P[i][j][k]*(vr[i+1][j][k]-vr[i-1][j][k])/(2*dr) \
-                  -sin(theta[i][j][k])*gamm*P[i][j][k]*vt[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))-gamm*P[i][j][k]*(vt[i][j+1][k]-vt[i][j-1][k]) \
-                  /(2*r[i][j][k]*dtheta)-gamm*P[i][j][k]*(vp[i][j][k+1]-vp[i][j][k-1])/(2*dphi*(a+r[i][j][k]*cos(theta[i][j][k])));
+  PetscScalar s = 0;
   return s;
 }
-PetscScalar F4_1(PetscInt i,PetscInt j,PetscInt k){
+PetscScalar F3_1(PetscInt i,PetscInt j,PetscInt k){
   PetscScalar s = -vr[i][j][k]/dt-vr[i][j][k]*(vr[i+1][j][k]-vr[i-1][j][k])/(2*dr)-vt[i][j][k]/r[i][j][k]* \
                   (vr[i][j+1][k]-vr[i][j-1][k])/(2*dtheta)-vp[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))* \
                   (vr[i][j][k+1]-vr[i][j][k-1])/(2*dphi)-(P[i+1][j][k]-P[i-1][j][k])/(2*dr*rho[i][j][k]) \
@@ -895,17 +886,17 @@ PetscScalar F4_1(PetscInt i,PetscInt j,PetscInt k){
                   *(Bt[i+1][j][k]-Bt[i-1][j][k])/(2*dr)+Bt[i][j][k]/r[i][j][k]*(Br[i][j+1][k]-Br[i][j-1][k])/(2*dtheta));
   return s;
 }
-PetscScalar F4_2(PetscInt i,PetscInt j,PetscInt k){
+PetscScalar F3_2(PetscInt i,PetscInt j,PetscInt k){
   PetscScalar s = -vt[i][j][k]/dt-vr[i][j][k]*(vt[i+1][j][k]-vt[i-1][j][k])/(2*dr)-vt[i][j][k]/r[i][j][k]* \
                   (vt[i][j+1][k]-vt[i][j-1][k])/(2*dtheta)-vp[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))* \
                   (vt[i][j][k+1]-vt[i][j][k-1])/(2*dphi)-(P[i][j+1][k]-P[i][j-1][k])/(2*dtheta*rho[i][j][k]*r[i][j][k]) \
                   +1/rho[i][j][k]*(Bt[i][j][k]*Br[i][j][k]/r[i][j][k]+Br[i][j][k]*(Bt[i+1][j][k]-Bt[i-1][j][k])/(2*dr) \
                   -Br[i][j][k]/r[i][j][k]*(Br[i][j+1][k]-Br[i][j-1][k])/(2*dtheta)+Bp[i][j][k]*Bp[i][j][k]* \
                   sin(theta[i][j][k])/(a+r[i][j][k]*cos(theta[i][j][k]))-Bp[i][j][k]/r[i][j][k]*(Bp[i][j+1][k]-Bp[i][j-1][k]) \
-                  /(2*dtheta)+Bp[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))*(Bt[i][j][k+1]-Bt[i][j][k-1])/(2*dphi));
+                  /(2*dtheta)+Bp[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))*(Bt[i][j][k+1]-Bt[i][j][k-1])/(2*dphi)) \
   return s;
 }
-PetscScalar F4_3(PetscInt i,PetscInt j,PetscInt k){
+PetscScalar F3_3(PetscInt i,PetscInt j,PetscInt k){
   PetscScalar s = -vp[i][j][k]/dt-vr[i][j][k]*(vp[i+1][j][k]-vp[i-1][j][k])/(2*dr)-vt[i][j][k]/r[i][j][k]* \
                   (vp[i][j+1][k]-vp[i][j-1][k])/(2*dtheta)-vp[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))* \
                   (vp[i][j][k+1]-vp[i][j][k-1])/(2*dphi)-(P[i][j][k+1]-P[i][j][k-1])/(rho[i][j][k]*(a+r[i][j][k]* \
@@ -913,20 +904,20 @@ PetscScalar F4_3(PetscInt i,PetscInt j,PetscInt k){
                   *cos(theta[i][j][k]))+Bt[i][j][k])/r[i][j][k]*(Bp[i][j+1][k]-Bp[i][j-1][k])/(2*dtheta)-Bt[i][j][k] \
                   /(a+r[i][j][k]*cos(theta[i][j][k]))*(Bt[i][j][k+1]-Bt[i][j][k-1])/(2*dphi)-Br[i][j][k]/(a+r[i][j][k] \
                   *cos(theta[i][j][k]))*(Br[i][j][k+1]-Br[i][j][k-1])/(2*dphi)+cos(theta[i][j][k])*Bp[i][j][k] \
-                  *Br[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))+Br[i][j][k]*(Bp[i+1][j][k]-Bp[i-1][j][k])/(2*dr);
+                  *Br[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))+Br[i][j][k]*(Bp[i+1][j][k]-Bp[i-1][j][k])/(2*dr));
   return s;
 }
-PetscScalar F3_1(PetscInt i,PetscInt j,PetscInt k){
+PetscScalar F4_1(PetscInt i,PetscInt j,PetscInt k){
   PetscScalar s = -Br[i][j][k]/dt-vt[i][j][k]/r[i][j][k]*(Br[i][j+1][k]-Br[i][j-1][k])/(2*dtheta)-Br[i][j][k]/r[i][j][k]* \
                   (vt[i][j+1][k]-vt[i][j-1][k])/(2*dtheta)+vr[i][j][k]/r[i][j][k]*(Bt[i][j+1][k]-Bt[i][j-1][k])/(2*dtheta) \
                   +Bt[i][j][k]/r[i][j][k]*(vr[i][j+1][k]-vr[i][j-1][k])/(2*dtheta)+sin(theta[i][j][k])/(a+r[i][j][k]* \
                   cos(theta[i][j][k]))*(vt[i][j][k]*Br[i][j][k]-vr[i][j][k]*Bt[i][j][k])+vr[i][j][k]/(a+r[i][j][k] \
                   *cos(theta[i][j][k]))*(Bp[i][j][k+1]-Bp[i][j][k-1])/(2*dphi)+Bp[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k])) \
-                  *(vr[i][j][k+1]-vr[i][j][k-1])/(2*dphi)-vp[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))*(Br[i][j][k+1] \
+                  *(vr[i][j][k+1]-vr[i]j[k-1])/(2*dphi)-vp[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))*(Br[i][j][k+1] \
                   -Bp[i][j][k-1])/(2*dphi)-Br[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))*(vp[i][j][k+1]-vp[i][j][k-1])/(2*dphi);
   return s;
 }
-PetscScalar F3_2(PetscInt i,PetscInt j,PetscInt k){
+PetscScalar F4_2(PetscInt i,PetscInt j,PetscInt k){
   PetscScalar s = -Bt[i][j][k]/dt-vp[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))*(Bt[i][j][k+1]-Bt[i][j][k-1])/(2*dphi)- \
                   Bt[i][j][k]/(a+r[i][j][k]*cos(theta[i][j][k]))*(vp[i][j][k+1]-vp[i][j][k-1])/(2*dphi)+vt[i][j][k] \
                   /(a+r[i][j][k]*cos(theta[i][j][k]))*(Bp[i][j][k+1]-Bp[i][j][k-1])/(2*dphi)+Bp[i][j][k]/(a+r[i][j][k] \
@@ -936,7 +927,7 @@ PetscScalar F3_2(PetscInt i,PetscInt j,PetscInt k){
                   *(vt[i][j][k]*Br[i][j][k]-vr[i][j][k]*Bt[i][j][k]);
   return s;
 }
-PetscScalar F3_3(PetscInt i,PetscInt j,PetscInt k){
+PetscScalar F4_3(PetscInt i,PetscInt j,PetscInt k){
   PetscScalar s = -Bp[i][j][k]/dt-vr[i][j][k]/(2*dr)*(Bp[i+1][j][k]-Bp[i-1][j][k])-Bp[i][j][k]/(2*dr)*(vr[i+1][j][k] \
                   -vr[i-1][j][k])+vp[i][j][k]/(2*dr)*(Br[i+1][j][k]-Br[i-1][j][k])+Br[i][j][k]/(2*dr)*(vp[i+1][j][k] \
                   -vp[i-1][j][k])-1/r[i][j][k]*(vr[i][j][k]*Bp[i][j][k]-vp[i][j][k]*Br[i][j][k])+vp[i][j][k]/r[i][j][k] \
@@ -949,12 +940,12 @@ PetscScalar F3_3(PetscInt i,PetscInt j,PetscInt k){
 
 int main(int argc,char **args)
 {
-  Vec            x,b,u,ve;  /* approx solution, RHS, exact solution */
+  Vec            x,b,u;  /* approx solution, RHS, exact solution */
   Mat            A;        /* linear system matrix */
   KSP            ksp;     /* linear solver context */
   PetscRandom    rctx;     /* random number generator context */
   PetscReal      norm;     /* norm of solution error */
-  PetscInt       i,j,k,Ii,J,Istart0,Iend0,n=110*8*200*8,its,nstep=2,t;
+  PetscInt       i,j,k,Ii,J,Istart0,Iend0,n,its,nstep;;
   PetscInt       Istart1,Iend1,Istart2,Iend2,Istart3,Iend3,Istart4,Iend4,Istart5,Iend5,Istart6,Iend6,Istart7,Iend7;
   PetscErrorCode ierr;
   PetscBool      flg = PETSC_FALSE;
@@ -964,39 +955,6 @@ int main(int argc,char **args)
   #if defined(PETSC_USE_LOG)
     PetscLogStage stage;
   #endif
-  ifstream fp1,fp2,fp3,fp4,fp5,fp6,fp7,fp8;
-  string rho_str,P_str,Br_str,Bt_str,Bp_str,vr_str,vt_str,vp_str;
-  fp1.open("rho_nova.dat",ios::in);
-  fp2.open("P_nova.dat",ios::in);
-  fp3.open("Br_nova.dat",ios::in);
-  fp4.open("Bt_nova.dat",ios::in);
-  fp5.open("Bp_nova.dat",ios::in);
-  fp6.open("vr_nova.dat",ios::in);
-  fp7.open("vt_nova.dat",ios::in);
-  fp8.open("vp_nova.dat",ios::in);
-  for(int i = 1;i <= npsi-1;i++){
-    for(int j = 1;j <= n2th-1;j++){
-      for(int k = 1;k <= nphi;k++){
-        fp1 >> rho_str;
-        fp2 >> P_str;
-        fp3 >> Br_str;
-        fp4 >> Bt_str;
-        fp5 >> Bp_str;
-        fp6 >> vr_str;
-        fp7 >> vt_str;
-        fp8 >> vp_str;
-        const char *rho_cstr  = rho_str.c_str();  rho[i][j][k] = atof(rho_cstr);
-        const char *P_cstr  = P_str.c_str();  P[i][j][k] = atof(P_cstr);
-        const char *Br_cstr  = Br_str.c_str();  Br[i][j][k] = atof(Br_cstr);
-        const char *Bt_cstr  = Bt_str.c_str();  Bt[i][j][k] = atof(Bt_cstr);
-        const char *Bp_cstr  = Bp_str.c_str();  Bp[i][j][k] = atof(Bp_cstr);
-        const char *vr_cstr  = vr_str.c_str();  vr[i][j][k] = atof(vr_cstr);
-        const char *vt_cstr  = vt_str.c_str();  vt[i][j][k] = atof(vt_cstr);
-        const char *vp_cstr  = vp_str.c_str();  vp[i][j][k] = atof(vp_cstr);
-
-      }
-    }
-  }
 
   PetscInitialize(&argc,&args,(char*)0,help);
   //ierr = PetscOptionsGetInt(NULL,NULL,"-m",&m,NULL);CHKERRQ(ierr);
@@ -1018,7 +976,7 @@ int main(int argc,char **args)
   ierr = MatCreate(PETSC_COMM_WORLD,&A);CHKERRQ(ierr);
   ierr = MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,n,n);CHKERRQ(ierr);
   ierr = MatSetFromOptions(A);CHKERRQ(ierr);
-  ierr = MatMPIAIJSetPreallocation(A,25,NULL,25,NULL);CHKERRQ(ierr);
+  ierr = MatMPIAIJSetPreallocation(A,5,NULL,5,NULL);CHKERRQ(ierr);
   //ierr = MatSeqAIJSetPreallocation(A,5,NULL);CHKERRQ(ierr);
   //ierr = MatSeqSBAIJSetPreallocation(A,1,5,NULL);CHKERRQ(ierr);
 
@@ -1054,8 +1012,11 @@ int main(int argc,char **args)
   }
 
 
-//组装矩阵A
+  //组装矩阵A
   if(rank == 0){
+    char fnamerho[] = "rho.dat";
+    PetscFOpen(PETSC_COMM_SELF,fnamerho,"w",&fp);
+    if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
     for(i = 1;i <= npsi-1;i++){
       for(j = 1;j <= n2th-1;j++){
         for(k = 1;k <= nphi;k++){
@@ -1096,36 +1057,49 @@ int main(int argc,char **args)
           }
           if(i == 1){
             coef = 1;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = 4./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos2,&coef,INSERT_VALUES);
             coef = 1./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi2 = Istart0 + (i+1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi2,&coef,INSERT_VALUES);
           }
-          else if(i == npsi-1){
+          else if(i == n2th-1){
             coef = 1;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = 4./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos1,&coef,INSERT_VALUES);
             coef = 1./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi2 = Istart0 + (i-3)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi2,&coef,INSERT_VALUES);
           }
           else{
             coef = dF1drho(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = dF1drhoi0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos1,&coef,INSERT_VALUES);
             coef = dF1drhoi1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos2,&coef,INSERT_VALUES);
             coef = dF1drhoj0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos3,&coef,INSERT_VALUES);
             coef = dF1drhoj1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos4,&coef,INSERT_VALUES);
             coef = dF1drhok0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos5,&coef,INSERT_VALUES);
             coef = dF1drhok1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos6,&coef,INSERT_VALUES);
             coef = dF1dvr(i,j,k);
             MatSetValues(A,1,&pos,1,&pos7,&coef,INSERT_VALUES);
@@ -1146,13 +1120,18 @@ int main(int argc,char **args)
             coef = dF1dvpk1(i,j,k);
             MatSetValues(A,1,&pos,1,&pos15,&coef,INSERT_VALUES);
           }
+          PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
         }
       }
     }
+      PetscFClose(PETSC_COMM_SELF,fp);
     //i==1
     //i==n2th-1
   }
   if(rank == 1){
+    char fnameP[] = "P.dat";
+    PetscFOpen(PETSC_COMM_SELF,fnamevp,"w",&fp);
+    if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
     for(i = 1;i <= npsi-1;i++){
       for(j = 1;j <= n2th-1;j++){
         for(k = 1;k <= nphi;k++){
@@ -1193,36 +1172,49 @@ int main(int argc,char **args)
           }
           if(i == 1){
             coef = 1;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = 4./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos2,&coef,INSERT_VALUES);
             coef = 1./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi2 = Istart1 + (i+1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi2,&coef,INSERT_VALUES);
           }
-          else if(i == npsi-1){
+          else if(i == n2th-1){
             coef = 1;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = 4./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos1,&coef,INSERT_VALUES);
             coef = 1./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi2 = Istart1 + (i-3)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi2,&coef,INSERT_VALUES);
           }
           else{
             coef = dF2dP(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = dF2dPi0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos1,&coef,INSERT_VALUES);
             coef = dF2dPi1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos2,&coef,INSERT_VALUES);
             coef = dF2dPj0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos3,&coef,INSERT_VALUES);
             coef = dF2dPj1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos4,&coef,INSERT_VALUES);
             coef = dF2dPk0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos5,&coef,INSERT_VALUES);
             coef = dF2dPk1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos6,&coef,INSERT_VALUES);
             coef = dF2dvr(i,j,k);
             MatSetValues(A,1,&pos,1,&pos7,&coef,INSERT_VALUES);
@@ -1243,11 +1235,16 @@ int main(int argc,char **args)
             coef = dF2dvpk1(i,j,k);
             MatSetValues(A,1,&pos,1,&pos15,&coef,INSERT_VALUES);
           }
+            PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
         }
       }
     }
+      PetscFClose(PETSC_COMM_SELF,fp);
   }
   if(rank == 2){
+    char fnameBr[] = "Br.dat";
+    PetscFOpen(PETSC_COMM_SELF,fnameBr,"w",&fp);
+    if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
     for(i = 1;i <= npsi-1;i++){
       for(j = 1;j <= n2th-1;j++){
         for(k = 1;k <= nphi;k++){
@@ -1304,34 +1301,45 @@ int main(int argc,char **args)
           }
           if(i == 1){
             coef = 1;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = 4./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi1 = Istart2 + i*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi1,&coef,INSERT_VALUES);
             coef = 1./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi2 = Istart2 + (i+1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi2,&coef,INSERT_VALUES);
           }
-          else if(i == npsi-1){
+          else if(i == n2th-1){
             coef = 1;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = 4./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi1 = Istart2 + (i-2)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi1,&coef,INSERT_VALUES);
             coef = 1./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi2 = Istart2 + (i-3)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi2,&coef,INSERT_VALUES);
           }
           else{
             coef = dF4_1dBr(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = dF4_1dBrj1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos1,&coef,INSERT_VALUES);
             coef = dF4_1dBrj0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos2,&coef,INSERT_VALUES);
             coef = dF4_1dBrk1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos3,&coef,INSERT_VALUES);
             coef = dF4_1dBrk0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos4,&coef,INSERT_VALUES);
             coef = dF4_1dBt(i,j,k);
             MatSetValues(A,1,&pos,1,&pos5,&coef,INSERT_VALUES);
@@ -1368,11 +1376,16 @@ int main(int argc,char **args)
             coef = dF4_1dvpk0(i,j,k);
             MatSetValues(A,1,&pos,1,&pos21,&coef,INSERT_VALUES);
           }
+            PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
         }
       }
     }
+      PetscFClose(PETSC_COMM_SELF,fp);
   }
   if(rank == 3){
+    char fnameBt[] = "Bt.dat";
+    PetscFOpen(PETSC_COMM_SELF,fnameBt,"w",&fp);
+    if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
     for(i = 1;i <= npsi-1;i++){
       for(j = 1;j <= n2th-1;j++){
         for(k = 1;k <= nphi;k++){
@@ -1417,34 +1430,45 @@ int main(int argc,char **args)
           }
           if(i == 1){
             coef = 1;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = 4./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi1 = Istart3 + i*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi1,&coef,INSERT_VALUES);
             coef = 1./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi2 = Istart3 + (i+1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi2,&coef,INSERT_VALUES);
           }
-          else if(i == npsi-1){
+          else if(i == n2th-1){
             coef = 1;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = 4./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi1 = Istart3 + (i-2)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi1,&coef,INSERT_VALUES);
             coef = 1./3.;
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             PetscInt posi2 = Istart3 + (i-3)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
             MatSetValues(A,1,&pos,1,&posi2,&coef,INSERT_VALUES);
           }
           else{
             coef = dF4_2dBt(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos,&coef,INSERT_VALUES);
             coef = dF4_2dBti1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos1,&coef,INSERT_VALUES);
             coef = dF4_2dBti0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos2,&coef,INSERT_VALUES);
             coef = dF4_2dBtk1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos3,&coef,INSERT_VALUES);
             coef = dF4_2dBtk0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             MatSetValues(A,1,&pos,1,&pos4,&coef,INSERT_VALUES);
             coef = dF4_2dBr(i,j,k);
             MatSetValues(A,1,&pos,1,&pos5,&coef,INSERT_VALUES);
@@ -1481,11 +1505,16 @@ int main(int argc,char **args)
             coef = dF4_2dvpk0(i,j,k);
             MatSetValues(A,1,&pos,1,&pos21,&coef,INSERT_VALUES);
           }
+            PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
         }
       }
     }
+      PetscFClose(PETSC_COMM_SELF,fp);
   }
-  if(rank == 4){
+ if(rank == 4){
+   char fnameBp[] = "Bp.dat";
+   PetscFOpen(PETSC_COMM_SELF,fnameBp,"w",&fp);
+   if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
      PetscInt I = npsi-1,J = n2th-1,K = nphi;
        for(i = 2;i < I; i++){
          for(j = 1;j <= J; j++){
@@ -1530,6 +1559,7 @@ int main(int argc,char **args)
              coef = dF4_3dBt(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dBp(i,j,k);
+             PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
              ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dvr(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos3,&coef,INSERT_VALUES);CHKERRQ(ierr);
@@ -1540,6 +1570,7 @@ int main(int argc,char **args)
              coef = dF4_3dBri1(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos6,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dBpi1(i,j,k);
+             PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
              ierr = MatSetValues(A,1,&pos0,1,&pos7,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dvri1(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos8,&coef,INSERT_VALUES);CHKERRQ(ierr);
@@ -1548,6 +1579,7 @@ int main(int argc,char **args)
              coef = dF4_3dBri0(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos10,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dBpi0(i,j,k);
+             PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
              ierr = MatSetValues(A,1,&pos0,1,&pos11,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dvri0(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos12,&coef,INSERT_VALUES);CHKERRQ(ierr);
@@ -1556,6 +1588,7 @@ int main(int argc,char **args)
              coef = dF4_3dBtk1(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos14,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dBpk1(i,j,k);
+             PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
              ierr = MatSetValues(A,1,&pos0,1,&pos15,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dvtk1(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos16,&coef,INSERT_VALUES);CHKERRQ(ierr);
@@ -1564,11 +1597,13 @@ int main(int argc,char **args)
              coef = dF4_3dBtk0(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos18,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dBpk0(i,j,k);
+             PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
              ierr = MatSetValues(A,1,&pos0,1,&pos19,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dvtk0(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos20,&coef,INSERT_VALUES);CHKERRQ(ierr);
              coef = dF4_3dvpk0(i,j,k);
              ierr = MatSetValues(A,1,&pos0,1,&pos21,&coef,INSERT_VALUES);CHKERRQ(ierr);
+             PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
            }
         }
       }
@@ -1577,13 +1612,17 @@ int main(int argc,char **args)
         for(k=1;k<=K;k++){
           PetscInt pos0 = Istart4+(i-1)*J*K+(j-1)*K+k-1;//Bp(i,j,k)
           coef = 1.0;
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
           ierr = MatSetValues(A,1,&pos0,1,&pos0,&coef,INSERT_VALUES);CHKERRQ(ierr);
           PetscInt pos1 = Istart4+i*J*K+(j-1)*K+k-1;//Bp(i+1,j,k)
           coef = -4./3.;
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
           ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
           PetscInt pos2 = Istart4+(i+1)*J*K+(j-1)*K+k-1;//Bp(i+2,j,k)
           coef = 1./3.;
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
           ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
+          PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
         }
       }
      i = I;
@@ -1591,17 +1630,25 @@ int main(int argc,char **args)
        for(k=1;k<=K;k++){
          PetscInt pos0 = Istart4+(i-1)*J*K+(j-1)*K+k-1;//Bp(i,j,k)
          coef = 1.0;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos0,&coef,INSERT_VALUES);CHKERRQ(ierr);
          PetscInt pos1 = Istart4+(i-2)*J*K+(j-1)*K+k-1;//Bp(i-1,j,k)
          coef = -4./3.;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
          PetscInt pos2 = Istart4+(i-3)*J*K+(j-1)*K+k-1;//Bp(i-2,j,k)
          coef = 1./3.;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
+         PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
        }
      }
+       PetscFClose(PETSC_COMM_SELF,fp);
   }
   if(rank == 5){
+    char fnamevr[] = "vr.dat";
+    PetscFOpen(PETSC_COMM_SELF,fnamevr,"w",&fp);
+    if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
     PetscInt I = npsi-1,J = n2th-1,K = nphi;
      for(i=2;i<I;i++){
        for(j=1;j<=J;j++){
@@ -1648,6 +1695,7 @@ int main(int argc,char **args)
 
 
            coef = dF3_1dvr(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos0,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_1dvt(i,j,k);
            ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
@@ -1660,16 +1708,22 @@ int main(int argc,char **args)
            coef = dF3_1dBp(i,j,k);
            ierr = MatSetValues(A,1,&pos0,1,&pos5,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_1dvri1(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos6,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_1dvri0(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos7,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_1dvrj1(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos8,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_1dvrj0(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos9,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_1dvrk1(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos10,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_1dvrk0(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos11,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_1dPi1(i,j,k);
            ierr = MatSetValues(A,1,&pos0,1,&pos12,&coef,INSERT_VALUES);CHKERRQ(ierr);
@@ -1691,6 +1745,7 @@ int main(int argc,char **args)
            ierr = MatSetValues(A,1,&pos0,1,&pos20,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_1dBpi0(i,j,k);
            ierr = MatSetValues(A,1,&pos0,1,&pos21,&coef,INSERT_VALUES);CHKERRQ(ierr);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
          }
        }
      }
@@ -1699,13 +1754,17 @@ int main(int argc,char **args)
        for(k=1;k<=K;k++){
          PetscInt pos0 = Istart5+(i-1)*J*K+(j-1)*K+k-1;//vr(i,j,k)
          coef = 1.0;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos0,&coef,INSERT_VALUES);CHKERRQ(ierr);
          PetscInt pos1 = Istart5+i*J*K+(j-1)*K+k-1;//vr(i+1,j,k)
          coef = -4./3.;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
          PetscInt pos2 = Istart5+(i+1)*J*K+(j-1)*K+k-1;//vr(i+2,j,k)
          coef = 1./3.;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
+         PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
        }
      }
     i = I;
@@ -1713,19 +1772,26 @@ int main(int argc,char **args)
       for(k=1;k<=K;k++){
         PetscInt pos0 = Istart4+(i-1)*J*K+(j-1)*K+k-1;//vr(i,j,k)
         coef = 1.0;
+        PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
         ierr = MatSetValues(A,1,&pos0,1,&pos0,&coef,INSERT_VALUES);CHKERRQ(ierr);
         PetscInt pos1 = Istart4+(i-2)*J*K+(j-1)*K+k-1;//vr(i-1,j,k)
         coef = -4./3.;
+        PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
         ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
         PetscInt pos2 = Istart4+(i-3)*J*K+(j-1)*K+k-1;//vr(i-2,j,k)
         coef = 1./3.;
+        PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
         ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
+        PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
       }
     }
-
+    PetscFClose(PETSC_COMM_SELF,fp);
   }
   if(rank == 6){
      PetscInt I = npsi-1,J = n2th-1,K = nphi;
+     char fnamevt[] = "vt.dat";
+     PetscFOpen(PETSC_COMM_SELF,fnamevt,"w",&fp);
+     if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
      for(i=2;i<I;i++){
        for(j=1;j<=J;j++){
          for(k=1;k<=K;k++){
@@ -1777,6 +1843,7 @@ int main(int argc,char **args)
            coef = dF3_2dvr(i,j,k);
            ierr = MatSetValues(A,1,&pos0,1,&pos0,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_2dvt(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_2dvp(i,j,k);
            ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
@@ -1789,16 +1856,22 @@ int main(int argc,char **args)
            coef = dF3_2dBp(i,j,k);
            ierr = MatSetValues(A,1,&pos0,1,&pos6,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_2dvti1(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos7,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_2dvti0(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos8,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_2dvtj1(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos9,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_2dvtj0(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos10,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_2dvtk1(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos11,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_2dvtk0(i,j,k);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
            ierr = MatSetValues(A,1,&pos0,1,&pos12,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_2dPj1(i,j,k);
            ierr = MatSetValues(A,1,&pos0,1,&pos13,&coef,INSERT_VALUES);CHKERRQ(ierr);
@@ -1820,6 +1893,7 @@ int main(int argc,char **args)
            ierr = MatSetValues(A,1,&pos0,1,&pos21,&coef,INSERT_VALUES);CHKERRQ(ierr);
            coef = dF3_2dBpj0(i,j,k);
            ierr = MatSetValues(A,1,&pos0,1,&pos22,&coef,INSERT_VALUES);CHKERRQ(ierr);
+           PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
          }
        }
      }
@@ -1828,32 +1902,44 @@ int main(int argc,char **args)
        for(k=1;k<=K;k++){
          PetscInt pos0 = Istart6+(i-1)*J*K+(j-1)*K+k-1;//Bp(i,j,k)
          coef = 1.0;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos0,&coef,INSERT_VALUES);CHKERRQ(ierr);
          PetscInt pos1 = Istart6+i*J*K+(j-1)*K+k-1;//Bp(i+1,j,k)
          coef = -4./3.;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
          PetscInt pos2 = Istart6+(i+1)*J*K+(j-1)*K+k-1;//Bp(i+2,j,k)
          coef = 1./3.;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
+         PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
        }
      }
-    i = I;
-    for(j=1;j<=J;j++){
-      for(k=1;k<=K;k++){
+     i = I;
+     for(j=1;j<=J;j++){
+       for(k=1;k<=K;k++){
         PetscInt pos0 = Istart6+(i-1)*J*K+(j-1)*K+k-1;//Bp(i,j,k)
         coef = 1.0;
+        PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
         ierr = MatSetValues(A,1,&pos0,1,&pos0,&coef,INSERT_VALUES);CHKERRQ(ierr);
         PetscInt pos1 = Istart6+(i-2)*J*K+(j-1)*K+k-1;//Bp(i-1,j,k)
         coef = -4./3.;
+        PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
         ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
         PetscInt pos2 = Istart6+(i-3)*J*K+(j-1)*K+k-1;//Bp(i-2,j,k)
         coef = 1./3.;
+        PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
         ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
+        PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
       }
-    }
+     }
+     PetscFClose(PETSC_COMM_SELF,fp);
   }
   if(rank == 7){
       PetscInt I = npsi-1,J = n2th-1,K = nphi;
+      char fnamevp[] = "vp.dat";
+      PetscFOpen(PETSC_COMM_SELF,fnamevp,"w",&fp);
+      if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
       for(i=2;i<I;i++){
         for(j=1;j<=J;j++){
           for(k=1;k<=K;k++){
@@ -1909,6 +1995,7 @@ int main(int argc,char **args)
             coef = dF3_3dvt(i,j,k);
             ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
             coef = dF3_3dvp(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
             coef = dF3_3drho(i,j,k);
             ierr = MatSetValues(A,1,&pos0,1,&pos3,&coef,INSERT_VALUES);CHKERRQ(ierr);
@@ -1919,16 +2006,22 @@ int main(int argc,char **args)
             coef = dF3_3dBp(i,j,k);
             ierr = MatSetValues(A,1,&pos0,1,&pos6,&coef,INSERT_VALUES);CHKERRQ(ierr);
             coef = dF3_3dvpi1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             ierr = MatSetValues(A,1,&pos0,1,&pos7,&coef,INSERT_VALUES);CHKERRQ(ierr);
             coef = dF3_3dvpi0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             ierr = MatSetValues(A,1,&pos0,1,&pos8,&coef,INSERT_VALUES);CHKERRQ(ierr);
             coef = dF3_3dvpj1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             ierr = MatSetValues(A,1,&pos0,1,&pos9,&coef,INSERT_VALUES);CHKERRQ(ierr);
             coef = dF3_3dvpj0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             ierr = MatSetValues(A,1,&pos0,1,&pos10,&coef,INSERT_VALUES);CHKERRQ(ierr);
             coef = dF3_3dvpk1(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             ierr = MatSetValues(A,1,&pos0,1,&pos11,&coef,INSERT_VALUES);CHKERRQ(ierr);
             coef = dF3_3dvpk0(i,j,k);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
             ierr = MatSetValues(A,1,&pos0,1,&pos12,&coef,INSERT_VALUES);CHKERRQ(ierr);
             coef = dF3_3dPk1(i,j,k);
             ierr = MatSetValues(A,1,&pos0,1,&pos13,&coef,INSERT_VALUES);CHKERRQ(ierr);
@@ -1950,6 +2043,7 @@ int main(int argc,char **args)
             ierr = MatSetValues(A,1,&pos0,1,&pos21,&coef,INSERT_VALUES);CHKERRQ(ierr);
             coef = dF3_3dBpj0(i,j,k);
             ierr = MatSetValues(A,1,&pos0,1,&pos22,&coef,INSERT_VALUES);CHKERRQ(ierr);
+            PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
           }
         }
       }
@@ -1958,13 +2052,17 @@ int main(int argc,char **args)
         for(k=1;k<=K;k++){
           PetscInt pos0 = Istart7+(i-1)*J*K+(j-1)*K+k-1;//Bp(i,j,k)
           coef = 1.0;
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
           ierr = MatSetValues(A,1,&pos0,1,&pos0,&coef,INSERT_VALUES);CHKERRQ(ierr);
           PetscInt pos1 = Istart7+i*J*K+(j-1)*K+k-1;//Bp(i+1,j,k)
           coef = -4./3.;
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
           ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
           PetscInt pos2 = Istart7+(i+1)*J*K+(j-1)*K+k-1;//Bp(i+2,j,k)
           coef = 1./3.;
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
           ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
+          PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
         }
       }
      i = I;
@@ -1972,386 +2070,376 @@ int main(int argc,char **args)
        for(k=1;k<=K;k++){
          PetscInt pos0 = Istart7+(i-1)*J*K+(j-1)*K+k-1;//Bp(i,j,k)
          coef = 1.0;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos0,&coef,INSERT_VALUES);CHKERRQ(ierr);
          PetscInt pos1 = Istart7+(i-2)*J*K+(j-1)*K+k-1;//Bp(i-1,j,k)
          coef = -4./3.;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos1,&coef,INSERT_VALUES);CHKERRQ(ierr);
          PetscInt pos2 = Istart7+(i-3)*J*K+(j-1)*K+k-1;//Bp(i-2,j,k)
          coef = 1./3.;
+         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)coef);
          ierr = MatSetValues(A,1,&pos0,1,&pos2,&coef,INSERT_VALUES);CHKERRQ(ierr);
+         PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
        }
      }
+     PetscFClose(PETSC_COMM_SELF,fp);
   }
-
   ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
   ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
 
+  ierr = VecCreate(PETSC_COMM_WORLD,&u);CHKERRQ(ierr);
+  ierr = VecSetSizes(u,PETSC_DECIDE,n);CHKERRQ(ierr);
+  ierr = VecSetFromOptions(u);CHKERRQ(ierr);
+  ierr = VecDuplicate(u,&b);CHKERRQ(ierr);
 
-  //检测代码
-  int flag = 0,sum = 0;
-    const PetscScalar *vals;
-    MatGetRow(A,1,NULL,NULL,&vals);
-    for(int j = 0;j < n;j++){
-      sum = sum + vals[j];
+  //初始化b向量
+  if(rank == 0){
+    for(i = 1;i <= npsi-1;i++){
+      for(j = 1;j <= n2th-1;j++){
+        for(k = 1;k <= nphi;k++){
+          PetscInt pos = Istart0 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+          coef = F1(i,j,k);
+          VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+        }
+      }
     }
-    if(sum == 0){
-      printf("%d\n",i);
+  }
+  if(rank == 1){
+    for(i = 1;i <= npsi-1;i++){
+      for(j = 1;j <= n2th-1;j++){
+        for(k = 1;k <= nphi;k++){
+          PetscInt pos = Istart1 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+          coef = F2(i,j,k);
+          VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+        }
+      }
     }
-    sum = 0;
+  }
+  if(rank == 2){
+    for(i = 1;i <= npsi-1;i++){
+      for(j = 1;j <= n2th-1;j++){
+        for(k = 1;k <= nphi;k++){
+          PetscInt pos = Istart2 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+          coef = F3_1(i,j,k);
+          VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+        }
+      }
+    }
+  }
+  if(rank == 3){
+    for(i = 1;i <= npsi-1;i++){
+      for(j = 1;j <= n2th-1;j++){
+        for(k = 1;k <= nphi;k++){
+          PetscInt pos = Istart3 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+          coef = F3_2(i,j,k);
+          VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+        }
+      }
+    }
+  }
+  if(rank == 4){
+    for(i = 1;i <= npsi-1;i++){
+      for(j = 1;j <= n2th-1;j++){
+        for(k = 1;k <= nphi;k++){
+          PetscInt pos = Istart4 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+          coef = F3_3(i,j,k);
+          VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+        }
+      }
+    }
+  }
+  if(rank == 5){
+    for(i = 1;i <= npsi-1;i++){
+      for(j = 1;j <= n2th-1;j++){
+        for(k = 1;k <= nphi;k++){
+          PetscInt pos = Istart5 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+          coef = F4_1(i,j,k);
+          VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+        }
+      }
+    }
+  }
+  if(rank == 6){
+    for(i = 1;i <= npsi-1;i++){
+      for(j = 1;j <= n2th-1;j++){
+        for(k = 1;k <= nphi;k++){
+          PetscInt pos = Istart6 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+          coef = F4_2(i,j,k);
+          VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+        }
+      }
+    }
+  }
+  if(rank == 7){
+    for(i = 1;i <= npsi-1;i++){
+      for(j = 1;j <= n2th-1;j++){
+        for(k = 1;k <= nphi;k++){
+          PetscInt pos = Istart7 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+          coef = F4_3(i,j,k);
+          VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+        }
+      }
+    }
+  }
 
 
+  flg  = PETSC_FALSE;
+  ierr = PetscOptionsGetBool(NULL,NULL,"-view_exact_sol",&flg,NULL);CHKERRQ(ierr);
+  if (flg) {ierr = VecView(u,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);}
 
-  // ierr = VecCreate(PETSC_COMM_WORLD,&u);CHKERRQ(ierr);
-  // ierr = VecSetSizes(u,PETSC_DECIDE,n);CHKERRQ(ierr);
-  // ierr = VecSetFromOptions(u);CHKERRQ(ierr);
-  // ierr = VecDuplicate(u,&b);CHKERRQ(ierr);
-  //
-  // //初始化b向量
-  // if(rank == 0){
-  //   for(i = 1;i <= npsi-1;i++){
-  //     for(j = 1;j <= n2th-1;j++){
-  //       for(k = 1;k <= nphi;k++){
-  //         PetscInt pos = Istart0 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //         coef = F1(i,j,k);
-  //         VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //       }
-  //     }
-  //   }
-  // }
-  // if(rank == 1){
-  //   for(i = 1;i <= npsi-1;i++){
-  //     for(j = 1;j <= n2th-1;j++){
-  //       for(k = 1;k <= nphi;k++){
-  //         PetscInt pos = Istart1 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //         coef = F2(i,j,k);
-  //         VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //       }
-  //     }
-  //   }
-  // }
-  // if(rank == 2){
-  //   for(i = 1;i <= npsi-1;i++){
-  //     for(j = 1;j <= n2th-1;j++){
-  //       for(k = 1;k <= nphi;k++){
-  //         PetscInt pos = Istart2 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //         coef = F3_1(i,j,k);
-  //         VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //       }
-  //     }
-  //   }
-  // }
-  // if(rank == 3){
-  //   for(i = 1;i <= npsi-1;i++){
-  //     for(j = 1;j <= n2th-1;j++){
-  //       for(k = 1;k <= nphi;k++){
-  //         PetscInt pos = Istart3 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //         coef = F3_2(i,j,k);
-  //         VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //       }
-  //     }
-  //   }
-  // }
-  // if(rank == 4){
-  //   for(i = 1;i <= npsi-1;i++){
-  //     for(j = 1;j <= n2th-1;j++){
-  //       for(k = 1;k <= nphi;k++){
-  //         PetscInt pos = Istart4 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //         coef = F3_3(i,j,k);
-  //         VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //       }
-  //     }
-  //   }
-  // }
-  // if(rank == 5){
-  //   for(i = 1;i <= npsi-1;i++){
-  //     for(j = 1;j <= n2th-1;j++){
-  //       for(k = 1;k <= nphi;k++){
-  //         PetscInt pos = Istart5 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //         coef = F4_1(i,j,k);
-  //         VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //       }
-  //     }
-  //   }
-  // }
-  // if(rank == 6){
-  //   for(i = 1;i <= npsi-1;i++){
-  //     for(j = 1;j <= n2th-1;j++){
-  //       for(k = 1;k <= nphi;k++){
-  //         PetscInt pos = Istart6 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //         coef = F4_2(i,j,k);
-  //         VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //       }
-  //     }
-  //   }
-  // }
-  // if(rank == 7){
-  //   for(i = 1;i <= npsi-1;i++){
-  //     for(j = 1;j <= n2th-1;j++){
-  //       for(k = 1;k <= nphi;k++){
-  //         PetscInt pos = Istart7 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //         coef = F4_3(i,j,k);
-  //         VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //       }
-  //     }
-  //   }
-  // }
-  //
-  //
-  // flg  = PETSC_FALSE;
-  // ierr = PetscOptionsGetBool(NULL,NULL,"-view_exact_sol",&flg,NULL);CHKERRQ(ierr);
-  // if (flg) {ierr = VecView(u,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);}
-  //
-  // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  //               Create the linear solver and set various options
-  //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  //
-  // /*
-  //    Create linear solver context
-  // */
-  // ierr = KSPCreate(PETSC_COMM_WORLD,&ksp);CHKERRQ(ierr);
-  // ierr = KSPSetOperators(ksp,A,A);CHKERRQ(ierr);
-  // ierr = KSPSetTolerances(ksp,1.e-2/(n+1),1.e-50,PETSC_DEFAULT,\
-  //                         PETSC_DEFAULT);CHKERRQ(ierr);
-  // ierr = KSPSetFromOptions(ksp);CHKERRQ(ierr);
-  //
-  // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  //                     Solve the linear system
-  //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  // for(t = 1;t <= nstep;t++){
-  //   ierr = VecCreate(PETSC_COMM_WORLD,&x);CHKERRQ(ierr);
-  //   ierr = VecSetSizes(x,PETSC_DECIDE,n);CHKERRQ(ierr);
-  //   ierr = VecSetFromOptions(x);CHKERRQ(ierr);
-  //   KSPSolve(ksp,b,x);
-  //   VecAssemblyBegin(x);
-  //   VecAssemblyEnd(x);
-  //   if(rank == 0){
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart0 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           VecGetValues(x,1,&pos,&coef);
-  //           rho[i][j][k] = rho[i][j][k] + coef;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   if(rank == 1){
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart1 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           VecGetValues(x,1,&pos,&coef);
-  //           P[i][j][k] = P[i][j][k] + coef;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   if(rank == 2){
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart2 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           VecGetValues(x,1,&pos,&coef);
-  //           Br[i][j][k] = Br[i][j][k] + coef;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   if(rank == 3){
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart3 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           VecGetValues(x,1,&pos,&coef);
-  //           Bt[i][j][k] = Bt[i][j][k] + coef;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   if(rank == 4){
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart4 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           VecGetValues(x,1,&pos,&coef);
-  //           Bp[i][j][k] = Bp[i][j][k] + coef;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   if(rank == 5){
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart5 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           VecGetValues(x,1,&pos,&coef);
-  //           vr[i][j][k] = vr[i][j][k] + coef;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   if(rank == 6){
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart6 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           VecGetValues(x,1,&pos,&coef);
-  //           vt[i][j][k] = vt[i][j][k] + coef;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   if(rank == 7){
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart7 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           VecGetValues(x,1,&pos,&coef);
-  //           vp[i][j][k] = vp[i][j][k] + coef;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   VecDestroy(&x);
-  //   //重置b同时记录数据
-  //   if(rank == 0){
-  //     char fname1[] = "rho.dat";
-  //     PetscFOpen(PETSC_COMM_SELF,fname1,"w",&fp);
-  //     if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)rho[i][j][1]);
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart0 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           coef = F1(i,j,k);
-  //           VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //         }
-  //       }
-  //       PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
-  //     }
-  //     PetscFClose(PETSC_COMM_SELF,fp);
-  //   }
-  //   if(rank == 1){
-  //     char fname2[] = "P.dat";
-  //     PetscFOpen(PETSC_COMM_SELF,fname2,"w",&fp);
-  //     if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)P[i][j][1]);
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart1 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           coef = F2(i,j,k);
-  //           VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //         }
-  //       }
-  //       PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
-  //     }
-  //     PetscFClose(PETSC_COMM_SELF,fp);
-  //   }
-  //   if(rank == 2){
-  //     char fname3[] = "Br.dat";
-  //     PetscFOpen(PETSC_COMM_SELF,fname3,"w",&fp);
-  //     if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)Br[i][j][1]);
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart2 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           coef = F3_1(i,j,k);
-  //           VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //         }
-  //       }
-  //       PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
-  //     }
-  //     PetscFClose(PETSC_COMM_SELF,fp);
-  //   }
-  //   if(rank == 3){
-  //     char fname4[] = "Bt.dat";
-  //     PetscFOpen(PETSC_COMM_SELF,fname4,"w",&fp);
-  //     if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)Bt[i][j][1]);
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart3 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           coef = F3_2(i,j,k);
-  //           VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //         }
-  //       }
-  //       PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
-  //     }
-  //     PetscFClose(PETSC_COMM_SELF,fp);
-  //   }
-  //   if(rank == 4){
-  //     char fname5[] = "Bp.dat";
-  //     PetscFOpen(PETSC_COMM_SELF,fname5,"w",&fp);
-  //     if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)Bp[i][j][1]);
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart4 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           coef = F3_3(i,j,k);
-  //           VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //         }
-  //       }
-  //       PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
-  //     }
-  //     PetscFClose(PETSC_COMM_SELF,fp);
-  //   }
-  //   if(rank == 5){
-  //     char fname6[] = "vr.dat";
-  //     PetscFOpen(PETSC_COMM_SELF,fname6,"w",&fp);
-  //     if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)vr[i][j][1]);
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart5 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           coef = F4_1(i,j,k);
-  //           VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //         }
-  //       }
-  //       PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
-  //     }
-  //     PetscFClose(PETSC_COMM_SELF,fp);
-  //   }
-  //   if(rank == 6){
-  //     char fname7[] = "vt.dat";
-  //     PetscFOpen(PETSC_COMM_SELF,fname7,"w",&fp);
-  //     if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)vt[i][j][1]);
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart6 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           coef = F4_2(i,j,k);
-  //           VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //         }
-  //       }
-  //       PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
-  //     }
-  //     PetscFClose(PETSC_COMM_SELF,fp);
-  //   }
-  //   if(rank == 7){
-  //     char fname8[] = "vp.dat";
-  //     PetscFOpen(PETSC_COMM_SELF,fname8,"w",&fp);
-  //     if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
-  //     for(i = 1;i <= npsi-1;i++){
-  //       for(j = 1;j <= n2th-1;j++){
-  //         PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)vp[i][j][1]);
-  //         for(k = 1;k <= nphi;k++){
-  //           PetscInt pos = Istart7 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
-  //           coef = F4_3(i,j,k);
-  //           VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
-  //         }
-  //       }
-  //       PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
-  //     }
-  //     PetscFClose(PETSC_COMM_SELF,fp);
-  //   }
-  // }
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                Create the linear solver and set various options
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+  /*
+     Create linear solver context
+  */
+  ierr = KSPCreate(PETSC_COMM_WORLD,&ksp);CHKERRQ(ierr);
+  ierr = KSPSetOperators(ksp,A,A);CHKERRQ(ierr);
+  ierr = KSPSetTolerances(ksp,1.e-2/(n+1),1.e-50,PETSC_DEFAULT,\
+                          PETSC_DEFAULT);CHKERRQ(ierr);
+  ierr = KSPSetFromOptions(ksp);CHKERRQ(ierr);
+
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                      Solve the linear system
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  for(n = 1;n <= nstep;i++){
+    ierr = VecCreate(PETSC_COMM_WORLD,&x);CHKERRQ(ierr);
+    ierr = VecSetSizes(x,PETSC_DECIDE,n);CHKERRQ(ierr);
+    ierr = VecSetFromOptions(x);CHKERRQ(ierr);
+    KSPSolve(ksp,b,x);
+    VecAssemblyBegin(x);
+    VecAssemblyEnd(x);
+    if(rank == 0){
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart0 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            VecGetValues(x,1,&pos,&coef);
+            rho[i][j][k] = rho[i][j][k] + coef;
+          }
+        }
+      }
+    }
+    if(rank == 1){
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart1 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            VecGetValues(x,1,&pos,&coef);
+            P[i][j][k] = P[i][j][k] + coef;
+          }
+        }
+      }
+    }
+    if(rank == 2){
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart2 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            VecGetValues(x,1,&pos,&coef);
+            Br[i][j][k] = Br[i][j][k] + coef;
+          }
+        }
+      }
+    }
+    if(rank == 3){
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart3 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            VecGetValues(x,1,&pos,&coef);
+            Bt[i][j][k] = Bt[i][j][k] + coef;
+          }
+        }
+      }
+    }
+    if(rank == 4){
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart4 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            VecGetValues(x,1,&pos,&coef);
+            Bp[i][j][k] = Bp[i][j][k] + coef;
+          }
+        }
+      }
+    }
+    if(rank == 5){
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart5 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            VecGetValues(x,1,&pos,&coef);
+            vr[i][j][k] = vr[i][j][k] + coef;
+          }
+        }
+      }
+    }
+    if(rank == 6){
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart6 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            VecGetValues(x,1,&pos,&coef);
+            vt[i][j][k] = vt[i][j][k] + coef;
+          }
+        }
+      }
+    }
+    if(rank == 7){
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart7 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            VecGetValues(x,1,&pos,&coef);
+            vp[i][j][k] = vp[i][j][k] + coef;
+          }
+        }
+      }
+    }
+    VecDestroy(&x);
+    //重置b同时记录数据
+    if(rank == 0){
+      char fname1[] = "rho.dat";
+      PetscFOpen(PETSC_COMM_SELF,fname1,"w",&fp);
+      if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)rho[i][j][1]);
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart0 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            coef = F1(i,j,k);
+            VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+          }
+        }
+        PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
+      }
+      PetscFClose(PETSC_COMM_SELF,fp);
+    }
+    if(rank == 1){
+      char fname2[] = "P.dat";
+      PetscFOpen(PETSC_COMM_SELF,fname2,"w",&fp);
+      if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)P[i][j][1]);
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart1 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            coef = F2(i,j,k);
+            VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+          }
+        }
+        PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
+      }
+      PetscFClose(PETSC_COMM_SELF,fp);
+    }
+    if(rank == 2){
+      char fname3[] = "Br.dat";
+      PetscFOpen(PETSC_COMM_SELF,fname3,"w",&fp);
+      if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)Br[i][j][1]);
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart2 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            coef = F3_1(i,j,k);
+            VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+          }
+        }
+        PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
+      }
+      PetscFClose(PETSC_COMM_SELF,fp);
+    }
+    if(rank == 3){
+      char fname4[] = "Bt.dat";
+      PetscFOpen(PETSC_COMM_SELF,fname4,"w",&fp);
+      if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)Bt[i][j][1]);
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart3 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            coef = F3_2(i,j,k);
+            VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+          }
+        }
+        PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
+      }
+      PetscFClose(PETSC_COMM_SELF,fp);
+    }
+    if(rank == 4){
+      char fname5[] = "Bp.dat";
+      PetscFOpen(PETSC_COMM_SELF,fname5,"w",&fp);
+      if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)Bp[i][j][1]);
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart4 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            coef = F3_3(i,j,k);
+            VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+          }
+        }
+        PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
+      }
+      PetscFClose(PETSC_COMM_SELF,fp);
+    }
+    if(rank == 5){
+      char fname6[] = "vr.dat";
+      PetscFOpen(PETSC_COMM_SELF,fname6,"w",&fp);
+      if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)vr[i][j][1]);
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart5 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            coef = F4_1(i,j,k);
+            VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+          }
+        }
+        PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
+      }
+      PetscFClose(PETSC_COMM_SELF,fp);
+    }
+    if(rank == 6){
+      char fname7[] = "vt.dat";
+      PetscFOpen(PETSC_COMM_SELF,fname7,"w",&fp);
+      if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)vt[i][j][1]);
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart6 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            coef = F4_2(i,j,k);
+            VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+          }
+        }
+        PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
+      }
+      PetscFClose(PETSC_COMM_SELF,fp);
+    }
+    if(rank == 7){
+      char fname8[] = "vp.dat";
+      PetscFOpen(PETSC_COMM_SELF,fname8,"w",&fp);
+      if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
+      for(i = 1;i <= npsi-1;i++){
+        for(j = 1;j <= n2th-1;j++){
+          PetscFPrintf(PETSC_COMM_SELF,fp,"%10e ",(double)vp[i][j][1]);
+          for(k = 1;k <= nphi;k++){
+            PetscInt pos = Istart7 + (i-1)*(n2th-1)*(nphi) + (j-1)*(nphi) + k-1;
+            coef = F4_3(i,j,k);
+            VecSetValues(b,1,&pos,&coef,INSERT_VALUES);
+          }
+        }
+        PetscFPrintf(PETSC_COMM_SELF,fp,"\n");
+      }
+      PetscFClose(PETSC_COMM_SELF,fp);
+    }
+
+  }
 
   ierr = PetscFinalize( );
   return 0;
