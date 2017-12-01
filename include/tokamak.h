@@ -5,12 +5,28 @@
 class Tokamak {
 private:
 	int rank, size;
+
+	//以下是环坐标系下变量
+	//toco is short for toroidal coordinates环坐标
 	int r_size, t_size, p_size;
 	float ***b_r, ***b_t, ***b_p;
+	//b means 磁场
 	float ***v_r, ***v_t, ***v_p;
-	float ***pres, ***dens;
+	//v means 速度
+	float ***pres_toco, ***dens_toco;
+	//pres is short for pressure压强
+	//dens is short for density密度
 	float ***toco_r, ***toco_p;
-	float ****gather;
+	float ****toco_gather;
+
+	//以下是柱坐标系下变量
+	//grid means 网格
+	int x_size, y_size, z_size;
+	float ***b_x, ***b_y, ***b_z;
+	float ***v_x, ***v_y, ***v_z;
+	float ***pres_grid, ***dens_grid;
+	float ****grid_gather;
+
 public:
 	int step;
 	Tokamak();//构造函数

@@ -6,39 +6,69 @@
 #define int PetscInt
 #define float PetscScalar
 
-Tokamak::Tokamak() {
+Tokamak::Tokamak() {//后面记得加入许多接口配置
+	//系统初始化
 	MPI_Comm_size(PETSC_COMM_WORLD, &size);
 	MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
-	//后面加入许多接口配置
 	step = 100;
+
+	//初始化环坐标
 	r_size = 111;
 	t_size = 200;
 	p_size = 8;
-	gather = new float***[10];
+	toco_gather = new float***[10];
 	//申请动态内存
 	if (rank == 0) {
 		for (int i = 0; i < 10; i++) {
-			gather[i] = new float**[r_size];
+			toco_gather[i] = new float**[r_size];
 			for (int j = 0; j < r_size; j++) {
-				gather[i][j] = new float*[t_size];
+				toco_gather[i][j] = new float*[t_size];
 				for (int k = 0; k < t_size; k++)
-					gather[i][j][k] = new float[p_size];
+					toco_gather[i][j][k] = new float[p_size];
 			}
 		}
-		b_r		= gather[0];
-		b_t		= gather[1];
-		b_p		= gather[2];
-		v_r		= gather[3];
-		v_t		= gather[4];
-		v_p		= gather[5];
-		pres	= gather[6];
-		dens	= gather[7];
-		toco_r	= gather[8];
-		toco_p	= gather[9];
+		b_r			= toco_gather[0];
+		b_t			= toco_gather[1];
+		b_p			= toco_gather[2];
+		v_r			= toco_gather[3];
+		v_t			= toco_gather[4];
+		v_p			= toco_gather[5];
+		pres_toco	= toco_gather[6];
+		dens_toco	= toco_gather[7];
+		toco_r		= toco_gather[8];
+		toco_p		= toco_gather[9];
 	}
 	else
 		for (int i = 0; i < 10; i++)
-			gather[i] = NULL;
+			toco_gather[i] = NULL;
+
+	//初始化柱坐标
+	x_size = 256;
+	y_size = 8;
+	z_size = 256;
+	grid_gather = new float***[8];
+	//申请动态内存
+	if (rank == 0) {
+		for (int i = 0; i < 8; i++) {
+			grid_gather[i] = new float**[x_size];
+			for (int j = 0; j < x_size; j++) {
+				grid_gather[i][j] = new float*[y_size];
+				for (int k = 0; k < y_size; k++)
+					grid_gather[i][j][k] = new float[z_size];
+			}
+		}
+		b_x			= grid_gather[0];
+		b_y			= grid_gather[1];
+		b_z			= grid_gather[2];
+		v_x			= grid_gather[3];
+		v_y			= grid_gather[4];
+		v_z			= grid_gather[5];
+		pres_grid	= grid_gather[6];
+		dens_grid	= grid_gather[7];
+	}
+	else
+		for (int i = 0; i < 8; i++)
+			grid_gather[i] = NULL;
 }
 
 void Tokamak::readin() {
@@ -61,8 +91,8 @@ void Tokamak::readin() {
 		for (int j = 0; j < r_size; j++) {
 			for (int k = 0; k < t_size; k++) {
 				for (int u = 0; u < p_size; u++) {
-					fscanf(fpr, "%lf", &gather[i][j][k][u]);
-					//printf("%d %d %d %d : %e\n", i, j, k, u, gather[i][j][k][u]);
+					fscanf(fpr, "%lf", &toco_gather[i][j][k][u]);
+					//printf("%d %d %d %d : %e\n", i, j, k, u, toco_gather[i][j][k][u]);
 				}
 			}
 		}
