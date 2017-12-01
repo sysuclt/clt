@@ -10,7 +10,7 @@ Input parameters include:\n\
 #include <petscksp.h>
 
 #undef __FUNCT__
-#define __FUNCT__ "main" 
+#define __FUNCT__ "main"
 extern PetscScalar Br[199][110][9],Bt[199][110][9],Bp[199][110][9],vr[199][110][8],vt[199][110][9],vp[199][110][9],P[199][110][9],rho[199][110][9];
 extern PetscScalar r[199][110][9],theta[199][110][9];
 
@@ -1511,7 +1511,7 @@ int main(int argc,char **args)
     }
       PetscFClose(PETSC_COMM_SELF,fp);
   }
- if(rank == 4){
+  if(rank == 4){
    char fnameBp[] = "Bp.dat";
    PetscFOpen(PETSC_COMM_SELF,fnameBp,"w",&fp);
    if (!fp) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
