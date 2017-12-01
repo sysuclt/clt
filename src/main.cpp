@@ -14,12 +14,12 @@ int main(int argc, char* argv[]) {
 	Tokamak tokamak;
 	tokamak.readin();//从文件中读入磁场、速度、压强、密度的环坐标数据
 	for (int i = 0; i < tokamak.step; i++) {
-		tokamak.switch2Grid();//四个环坐标变四个网格
+		//tokamak.toco2grid();//四个环坐标变四个网格
 		tokamak.calculateDeltaTime();//计算隐格式时间步长
 		tokamak.makeMatrixVec();//由四个网格组装成一个矩阵和右端项
 		tokamak.calculate();//计算出下一个时间步的结果
 		tokamak.scatterVec();//将计算结果还原为四个网格
-		tokamak.switch2Cyc();//转换为环坐标
+		tokamak.grid2toco();//转换为环坐标
 		tokamak.extraPolation();//向外插值
 	}
 	tokamak.print();

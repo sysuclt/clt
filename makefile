@@ -18,7 +18,7 @@ all : ${BIN_DIR}/main
 #更改运行参数改这里#
 #################
 
-${BIN_DIR}/main : ${BUILD_DIR}/main.o ${BUILD_DIR}/tokamak.o
+${BIN_DIR}/main : ${BUILD_DIR}/main.o ${BUILD_DIR}/tokamak.o ${BUILD_DIR}/shepard.o
 	@mkdir -p ${BIN_DIR}
 	@-${CLINKER} $^ -o $@  ${PETSC_ALL_LIB}
 
@@ -27,5 +27,9 @@ ${BUILD_DIR}/main.o : ${SRC_DIR}/main.cpp
 	${CXX} -c ${INCLUDE} ${CXXFLAGS} $^ -o $@
 
 ${BUILD_DIR}/tokamak.o : ${SRC_DIR}/tokamak.cpp
+	@mkdir -p ${BUILD_DIR}
+	${CXX} -c ${INCLUDE} ${CXXFLAGS} $^ -o $@
+
+${BUILD_DIR}/shepard.o : ${SRC_DIR}/shepard.cpp
 	@mkdir -p ${BUILD_DIR}
 	${CXX} -c ${INCLUDE} ${CXXFLAGS} $^ -o $@

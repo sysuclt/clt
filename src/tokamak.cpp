@@ -1,4 +1,5 @@
 #include "tokamak.h"
+#include "shepard.h"
 #include <cstdio>
 #include <petscvec.h>
 #include <petscmat.h>
@@ -49,7 +50,7 @@ Tokamak::Tokamak() {//后面记得加入许多接口配置
 	grid_gather = new float***[8];
 	//申请动态内存
 	if (rank == 0) {
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 10; i++) {
 			grid_gather[i] = new float**[x_size];
 			for (int j = 0; j < x_size; j++) {
 				grid_gather[i][j] = new float*[y_size];
@@ -65,6 +66,8 @@ Tokamak::Tokamak() {//后面记得加入许多接口配置
 		v_z			= grid_gather[5];
 		pres_grid	= grid_gather[6];
 		dens_grid	= grid_gather[7];
+		grid_x		= toco_gather[8];
+		grid_z		= toco_gather[9];
 	}
 	else
 		for (int i = 0; i < 8; i++)
@@ -99,8 +102,29 @@ void Tokamak::readin() {
 	}
 }
 
-void Tokamak::switch2Grid(){
+void Tokamak::toco2grid(){
 	//四个环坐标变四个网格
+	if (rank != 0)
+		return;
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < p_size; j++) {
+			double *x = new double[r_size*t_size];
+			double *y = new double[r_size*t_size];
+			double *f = new double[r_size*t_size];
+			for (int k = 0; k < r_size; k++)
+				for (int u = 0; u < t_size; u++) {
+					x[k*t_size+u] = toco_r[k][u][j];/*顺序可能有问题！！！*/
+					y[k*t_size+u] = toco_p[k][u][j];/*顺序可能有问题！！！*/
+					f[k*t_size+u] = toco_gather[i][k][u][j];
+				}
+			//transformer.Set_Missing();//这是啥！！！
+			CShepard2d transformer;
+			transformer.Interpolate(x, y, f, r_size*t_size, 33, 89);/*参数调整！！！*/
+			for (int k = 0; k < x_size; k++)
+				for (int u = 0; u < z_size; u++)
+					transformer.GetValue(grid_x[k][j][u], grid_z[k][j][u], grid_gather[i][k][j][u]);
+		}
+	}
 }
 
 void Tokamak::calculateDeltaTime() {
@@ -119,7 +143,7 @@ void Tokamak::scatterVec() {
 	//将计算结果还原为四个网格
 }
 
-void Tokamak::switch2Cyc() {
+void Tokamak::grid2toco() {
 	//转换为环坐标
 }
 

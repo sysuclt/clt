@@ -2,6 +2,23 @@
 
 ## 更新日志
 
+### 2017/12/01 22:00
+- 对函数名做出了一定调整
+- 分离了`tokamak.h`和`tokamak.cpp`
+- 完成了数据读入函数，但部分数据缺失
+- 在网上找到了别人已经写好了的把环坐标变换乘网格的[c++程序](https://github.com/UoA-eResearch/saga-gis/blob/master/saga-gis/src/modules/grid/grid_gridding/Shepard.cpp)
+- 完成了从环坐标变换到网格的程序（直接移植了别人封装好的代码）`Tokamak::toco2grid()`
+
+#### 有待解决的问题
+- 缺少环坐标每个点的实际坐标值的数据（包括第三维）
+- 缺少网格坐标每个点的实际坐标的定义（包括第三维）
+- 忘了网格坐标的规模，现在暂时随手写成了256×256×8
+- 考证环坐标变换成网格程序的正确性，顺便质疑一下只用二维面的数据没问题么
+- 用了别人开源代码要怎么声明别人的版权呀
+- 环坐标变换成网格需要参数输入，需要如何确定
+- 暂时还没写自定义接口
+- 怎么都没研究明白用[`PetscOptionsSetValue()`](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Sys/PetscOptionsSetValue.html)配置[`PetscInt`](https://www.mcs.anl.gov/petsc/petsc-3.7/docs/manualpages/Sys/PetscInt.html#PetscInt)位数的方法
+
 ### 2017/11/15 18:00
 - 程序框架基本没有问题，加了一点小改动
 - 原来的数据处理函数应该没问题
