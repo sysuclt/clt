@@ -18,8 +18,8 @@ double psia,psmin,psmax,qmin,qmax,q0;
 double alphar=0;
 double prho=1.;
 double arho=1.;
-PetscScalar Br[111][200][9],Bt[111][200][9],Bp[111][200][9],vr[111][200][9],vt[111][200][9],vp[111][200][9],P[111][200][9],rho[111][200][9];
-PetscScalar r[111][200][9],theta[111][200][9];
+PetscScalar Br[200][110][9],Bt[200][111][9],Bp[200][111][9],vr[200][111][8],vt[200][111][9],vp[200][111][9],P[200][111][9],rho[200][111][9];
+PetscScalar r[200][110][9],theta[200][111][9];
 
 double rhom(double psival){
     double rsq,rho_re;
@@ -46,7 +46,7 @@ void interp1d3l(double x1,double x2,double x3,double x4,double y1,double y2,doub
 
 
 int main(int argc,char **args){
-  FILE           *fp1,*fp2,*fp3,*fp4,*fp5,*fp6,*fp7,*fp8;
+  FILE           *fp1,*fp2,*fp3,*fp4,*fp5,*fp6,*fp7,*fp8,*fp9,*fp10;
   PetscErrorCode ierr;
   PetscInitialize(&argc,&args,(char*)0,help);
 
@@ -359,8 +359,8 @@ int main(int argc,char **args){
     }
   }
   //坐标变换
-  for(int i = 1;i <= npsi-1;i++){
-    for(int j = 1;j <= n2th-1;j++){
+  for(int j = 1;j <= npsi-1;j++){
+    for(int i = 1;i <= n2th-1;i++){
       jd = (i-1)*(n2th-1)+j;
       for(int k = 1;k <= nphi;k++){
         Br[i][j][k] = bx_NOVA[jd]*cos(th_NOVA[jd])-bz_NOVA[jd]/r_NOVA[jd]*sin(th_NOVA[jd]);
@@ -384,6 +384,8 @@ int main(int argc,char **args){
   char fname6[] = "vr_nova.dat";
   char fname7[] = "vt_nova.dat";
   char fname8[] = "vp_nova.dat";
+  char fname9[] = "r_nova.dat";
+  char fname10[] = "theta_nova.dat";
   PetscFOpen(PETSC_COMM_SELF,fname1,"w",&fp1);
   PetscFOpen(PETSC_COMM_SELF,fname2,"w",&fp2);
   PetscFOpen(PETSC_COMM_SELF,fname3,"w",&fp3);
@@ -392,6 +394,8 @@ int main(int argc,char **args){
   PetscFOpen(PETSC_COMM_SELF,fname6,"w",&fp6);
   PetscFOpen(PETSC_COMM_SELF,fname7,"w",&fp7);
   PetscFOpen(PETSC_COMM_SELF,fname8,"w",&fp8);
+  PetscFOpen(PETSC_COMM_SELF,fname9,"w",&fp9);
+  PetscFOpen(PETSC_COMM_SELF,fname10,"w",&fp10);
   if (!fp1) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
   if (!fp2) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
   if (!fp3) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
@@ -400,8 +404,10 @@ int main(int argc,char **args){
   if (!fp6) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
   if (!fp7) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
   if (!fp8) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
-  for(int i = 1;i <= npsi-1;i++){
-    for(int j = 1;j <= n2th-1;j++){
+  if (!fp9) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
+  if (!fp10) SETERRQ(PETSC_COMM_SELF,PETSC_ERR_USER,"Cannot open file");
+  for(int j = 1;j <= npsi-1;j++){
+    for(int i = 1;i <= n2th-1;i++){
       for(int k = 1;k <= nphi;k++){
         PetscFPrintf(PETSC_COMM_SELF,fp1,"%10e ",(double)rho[i][j][k]);
         PetscFPrintf(PETSC_COMM_SELF,fp2,"%10e ",(double)P[i][j][k]);
@@ -411,6 +417,8 @@ int main(int argc,char **args){
         PetscFPrintf(PETSC_COMM_SELF,fp6,"%10e ",(double)vr[i][j][k]);
         PetscFPrintf(PETSC_COMM_SELF,fp7,"%10e ",(double)vt[i][j][k]);
         PetscFPrintf(PETSC_COMM_SELF,fp8,"%10e ",(double)vp[i][j][k]);
+        PetscFPrintf(PETSC_COMM_SELF,fp9,"%10e ",(double)r[i][j][k]);
+        PetscFPrintf(PETSC_COMM_SELF,fp10,"%10e ",(double)theta[i][j][k]);
       }
     }
     PetscFPrintf(PETSC_COMM_SELF,fp1,"\n");
@@ -421,6 +429,8 @@ int main(int argc,char **args){
     PetscFPrintf(PETSC_COMM_SELF,fp6,"\n");
     PetscFPrintf(PETSC_COMM_SELF,fp7,"\n");
     PetscFPrintf(PETSC_COMM_SELF,fp8,"\n");
+    PetscFPrintf(PETSC_COMM_SELF,fp9,"\n");
+    PetscFPrintf(PETSC_COMM_SELF,fp10,"\n");
   }
   PetscFClose(PETSC_COMM_SELF,fp1);
   PetscFClose(PETSC_COMM_SELF,fp2);
@@ -430,6 +440,8 @@ int main(int argc,char **args){
   PetscFClose(PETSC_COMM_SELF,fp6);
   PetscFClose(PETSC_COMM_SELF,fp7);
   PetscFClose(PETSC_COMM_SELF,fp8);
+  PetscFClose(PETSC_COMM_SELF,fp9);
+  PetscFClose(PETSC_COMM_SELF,fp10);
   // if(nrank.eq.0) then
   // do j=1,npsi
   // do i=3,nthe+1

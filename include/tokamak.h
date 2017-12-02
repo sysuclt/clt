@@ -8,15 +8,15 @@ private:
 
 	//以下是环坐标系下变量
 	//toco is short for toroidal coordinates环坐标
-	int r_size, t_size, p_size;
-	float ***b_r, ***b_t, ***b_p;
+	int t_size, r_size, p_size;
+	float ***b_t, ***b_r, ***b_p;
 	//b means 磁场
-	float ***v_r, ***v_t, ***v_p;
+	float ***v_t, ***v_r, ***v_p;
 	//v means 速度
 	float ***pres_toco, ***dens_toco;
 	//pres is short for pressure压强
 	//dens is short for density密度
-	float ***toco_r, ***toco_p;/*NO DATA!!!!!!!*/
+	float ***toco_t, ***toco_r;/*NO DATA!!!!!!!*/
 	//坐标上每个点实际的r、p的值
 	float ****toco_gather;
 
