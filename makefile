@@ -18,18 +18,16 @@ all : ${BIN_DIR}/main
 #更改运行参数改这里#
 #################
 
-${BIN_DIR}/main : ${BUILD_DIR}/main.o ${BUILD_DIR}/tokamak.o ${BUILD_DIR}/shepard.o
+${BIN_DIR}/main : ${BUILD_DIR}/main.o ${BUILD_DIR}/tokamak.o ${BUILD_DIR}/shepard.o ${BUILD_DIR}/FEI.o
 	@mkdir -p ${BIN_DIR}
 	@-${CLINKER} $^ -o $@  ${PETSC_ALL_LIB}
 
-${BUILD_DIR}/main.o : ${SRC_DIR}/main.cpp
+${BUILD_DIR}/%.o : ${BUILD_DIR}/%.cpp
 	@mkdir -p ${BUILD_DIR}
 	${CXX} -c ${INCLUDE} ${CXXFLAGS} $^ -o $@
 
-${BUILD_DIR}/tokamak.o : ${SRC_DIR}/tokamak.cpp
+${BUILD_DIR}/%.cpp : ${SRC_DIR}/%.cpp
 	@mkdir -p ${BUILD_DIR}
-	${CXX} -c ${INCLUDE} ${CXXFLAGS} $^ -o $@
-
-${BUILD_DIR}/shepard.o : ${SRC_DIR}/shepard.cpp
-	@mkdir -p ${BUILD_DIR}
-	${CXX} -c ${INCLUDE} ${CXXFLAGS} $^ -o $@
+	python3 ./src/FEI.py $^ $@
+	@mkdir -p ${SRC_DIR}/${BUILD_DIR}
+	cp -f $@ ${SRC_DIR}/$@

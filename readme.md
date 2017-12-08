@@ -2,6 +2,10 @@
 
 ## 更新日志
 
+### 2017/12/08 22:00
+- 研发了FEI（Formula & Equation Interperter）
+- 尝试将FEI应用于之前写的解泊松方程的程序中，但是出现了未知bug
+
 ### 2017/12/01 22:00
 - 对函数名做出了一定调整
 - 分离了`tokamak.h`和`tokamak.cpp`

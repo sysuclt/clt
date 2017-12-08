@@ -10,12 +10,12 @@ $$\underline{u_{i,j}} = 0$$
 $$\underline{u_{i,j}} = 0$$
 
 ####@ LEFT_SIDE_BORDER : (i = 0)
-$$\underline{u_{i,j}} = \frac{sin(\pi*y)}{9+{\pi}^2}$$
+$$\underline{u_{i,j}} = \frac{sin(\pi*y_{j})}{9+{\pi}^2}$$
 
 ####@ RIGHT_SIDE_BORDER : (i = \\(\pi\\))
-$$\underline{u_{i,j}} = -\frac{sin(\pi*y)}{9+{\pi}^2}$$
+$$\underline{u_{i,j}} = -\frac{sin(\pi*y_{j})}{9+{\pi}^2}$$
 
 ####@ FIVE_POINT_DIFFERENCE_FORMAT_EQUATION
-$$\underline{u_{i,j}}-\frac{1}{4}\underline{u_{i-1,j}}-\frac{1}{4}\underline{u_{i+1,j}}-\frac{1}{4}\underline{u_{i,j-1}}-\frac{1}{4}\underline{u_{i,j+1}}=\frac{{h}^2}{4}*f(i,j)$$
+$$\underline{u_{i,j}}-\frac{1}{4}\underline{u_{i-1,j}}-\frac{1}{4}\underline{u_{i+1,j}}-\frac{1}{4}\underline{u_{i,j-1}}-\frac{1}{4}\underline{u_{i,j+1}}=\frac{{h}^2}{4}*f(x_{i},y_{j})$$
 
 <meta http-equiv="refresh" content="30">

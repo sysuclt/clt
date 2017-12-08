@@ -1,15 +1,13 @@
-#define int PetesInt
-#define float PetscScalr
+#include <petscsys.h>
+#define int PetscInt
+#define float PetscScalar
 
 class FEI {
 public:
-	int n, row, *column;
-	float *value, rightItem;
-	FEI(int n, int row) : n(n), row(row) {
-		column = new int[n];
-		value = new float[n];
-	}
-	void set(int column, float value) {
-		this->column[column] = value;
-	}
-}
+	int n, row, *columns;
+	float *values, rightItem;
+	int top;
+	FEI(int n, int row);
+	void set(int column, float value);
+	~FEI();
+};

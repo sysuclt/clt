@@ -1,7 +1,10 @@
+#-*- coding: UTF-8 -*- 
 import codecs
 import os
 import sys
 import re
+
+DATA_FORMAT = "(float)"
 
 
 class Formula:
@@ -20,10 +23,10 @@ class Equation:
 
 	def total(self, map):
 		self.n = len(self.variable)
-		back = "\n{\n" + "	FEI newFEI(" + str(self.n)+"," + map + ");\n"
+		back = "\n" + "	FEI newFEI(" + str(self.n)+", " + map + ");\n"
 		for i in range(self.n):
-			back += "	newFEI.set("+self.variable[i] + ", "+self.coefficient[i] + ");\n"
-		back += "	newFEI.rightItem = " + self.rightItem + ";\n}\n"
+			back += "	newFEI.set("+self.variable[i] + ", " +self.coefficient[i] + ");\n"
+		back += "	newFEI.rightItem = " + self.rightItem + ";\n"
 		return back
 
 
@@ -117,7 +120,7 @@ def latexTranslate(str):
 		p0 = i.span()[1]#位于第一个{后的字符
 		p1 = findRightCurlyBrace(str, p0)#位于第一个}
 		p2 = findRightCurlyBrace(str, p1+2)#位于第二个}
-		str = str[:i.span()[0]] + '(' + str[p0:p1] + r')/(' + str[p1+2:p2] + ')'
+		str = str[:i.span()[0]] + '(' + str[p0:p1] + r')/(' + str[p1+2:p2] + ')' + str[p2+1:]
 		i = re.search(r'\\frac\{', str)
 	# 去除转义字符*
 	str = re.sub(r'\\\*', '*', str)
@@ -126,10 +129,15 @@ def latexTranslate(str):
 		str = re.sub(i, i[2:], str)
 		str = re.sub(i[:2]+'\{'+i[2:]+'\}', i[2:], str)
 	# 添加忽略的乘法
-	i = re.search(r'(^|[^A-Za-z])(?P<num>\d+)[A-Za-z\(]', str)
+	i = re.search(r'(^|[^A-Za-z])(?P<num>[\d|.]+)[A-Za-z\(]', str)
 	while i :
 		str = re.sub(i.group('num'), i.group('num')+'*', str)
 		i = re.search(r'(^|[^A-Za-z])(?P<num>\d+)[A-Za-z\(]', str)
+	# 处理整数精度转化
+	i = re.search(r'(^|[^A-Za-z\)])(?P<num>\d+)(\n|$|[^A-Za-z])', str)
+	while i :
+		str = re.sub(i.group('num'), DATA_FORMAT + i.group('num'), str)
+		i = re.search(r'(^|[^A-Za-z)])(?P<num>\d+)(\n|$|[^A-Za-z])', str)
 	return str
 
 
@@ -235,17 +243,16 @@ class FEI:
 					sys.exit(1)
 
 
-def compileCpp(inputFileName):
-	outputFileName = inputFileName + 's'
+def compileCpp(inputFileName, outputFileName):
 	try:
 		inputFile = codecs.open(inputFileName, "r", "utf-8")
 	except Exception:
 		print("Can not open" + inputFileName)
 		sys.exit(1)
 	try:
-		outputFile = codecs.open(sys.path[0] + r"/../build/" + outputFileName, "w", "utf-8")
+		outputFile = codecs.open(outputFileName, "w", "utf-8")
 	except Exception:
-		print("Can not create", outputFileName, "at", sys.path[0] + r"/../build/")
+		print("Can not create", outputFileName)
 		sys.exit(1)
 	inputFileData = inputFile.readlines()
 	for i in inputFileData:
@@ -275,8 +282,15 @@ def compileCpp(inputFileName):
 
 if __name__ == "__main__":
 	FEI = FEI()
-	files = os.listdir()
+	'''files = os.listdir()
 	for i in files:
 		if re.match(r'.*\.cpp', i):
-			compileCpp(i)
+			compileCpp(i)'''
+	if len(sys.argv) < 2:
+		print('No file is indicated!')
+		sys.exit(1)
+	inputFileName = sys.argv[1]
+	outputFileName = sys.argv[2];
+	compileCpp(inputFileName, outputFileName)
+	print('FEI compile', inputFileName, 'finished!')
 
